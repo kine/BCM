@@ -1,9 +1,39 @@
-# Script to manage BC instances. Replace the GUI MMC console snapin
+<#
+.SYNOPSIS
+Script to manage Business Central instances
+
+.DESCRIPTION
+Show menu with functions and allows admin to select which function to run
+
+.PARAMETER Version
+Set which version of Management libraries to load. If empty, Latest is used. Example: 17.0
+
+.EXAMPLE
+.\Start-BCM.ps1 -Version 17.0
+
+#>
 param(
     [Parameter(Mandatory=$false)]
     [String]$Version = ''
 )
 
+<#
+.SYNOPSIS
+Register new function into the menu
+
+.DESCRIPTION
+Add item into main menu and set which function to call when selected
+
+.PARAMETER Function
+Name of the function which will be called when menu item is selected (no parameters are passed)
+
+.PARAMETER Name
+Description to show in the menu
+
+.EXAMPLE
+RegisterFunction -Function 'Exit' -Name 'Exit'
+
+#>
 function RegisterFunction
 {
     param($Function,$Name)
