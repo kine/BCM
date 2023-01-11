@@ -19,7 +19,7 @@ function SelectInstance
 
 function SetInstance
 {
-    $ActiveInstance = SelectInstance
+    Set-Variable -Name ActiveInstance -Value (SelectInstance) -Scope Global
 }
 
 Set-Variable -Name MenuItems -Value @() -Scope Global
@@ -29,22 +29,19 @@ Get-ChildItem -Path $PSScriptRoot -Filter *.ps1 -Exclude Start-BCM.ps1 -Recurse 
 Import-Module (Get-ChildItem -Path 'C:\Program Files\Microsoft Dynamics 365 Business Central' -Include 'Microsoft.Dynamics.Nav.Management.dll' -Recurse | Where-Object {$_.VersionInfo.ProductVersion -like "$Version*"} | Sort-Object -Property LastWriteTime | Select-Object -Last 1)
 Import-Module (Get-ChildItem -Path 'C:\Program Files\Microsoft Dynamics 365 Business Central' -Include 'Microsoft.Dynamics.Nav.Apps.Management.dll' -Recurse | Where-Object {$_.VersionInfo.ProductVersion -like "$Version*"} | Sort-Object -Property LastWriteTime | Select-Object -Last 1)
 
-$ActiveInstance = ''
+Set-Variable -Name ActiveInstance -Value '' -Scope Global
 $Choice = ''
+
+RegisterFunction -Function 'SetInstance' -Name 'Select Instance'
+RegisterFunction -Function 'Exit' -Name 'Exit'
+
 do {
-
-    RegisterFunction -Function 'SetInstance' -Name 'Select Instance'
-    RegisterFunction -Function 'Exit' -Name 'Exit'
-
-
     $Choice = $Items |Select-Object -property @{Label="Function";Expression={($_.Function)}},@{Label="Description";Expression={($_.Name)}} | Out-GridView -Title "Choice (Active instance: '$ActiveInstance')" -OutputMode Single
 
-    switch ($Choice.Name)
-    {
-        "GetInstances" {GetInstances}
-        "SetInstance" {SetInstance}
-        "Config" { Config}
-        "Restart" {Restart}
+    if ($Choice.Function -ne 'Exit') {
+        $FunctionName = $Choice.Function
+        Write-Host "Running function $FunctionName"
+        &$FunctionName
     }
 
-} until ((-not $Choice) -or ($Choice.Name -eq 'Exit'))
+} until ((-not $Choice) -or ($Choice.Function -eq 'Exit'))
