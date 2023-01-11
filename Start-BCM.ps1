@@ -36,7 +36,8 @@ RegisterFunction -Function 'SetInstance' -Name 'Select Instance'
 RegisterFunction -Function 'Exit' -Name 'Exit'
 
 do {
-    $Choice = $Items |Select-Object -property @{Label="Function";Expression={($_.Function)}},@{Label="Description";Expression={($_.Name)}} | Out-GridView -Title "Choice (Active instance: '$ActiveInstance')" -OutputMode Single
+    Write-Host "Displaying menu"
+    $Choice = $MenuItems |Select-Object -property @{Label="Function";Expression={($_.Function)}},@{Label="Description";Expression={($_.Name)}} | Out-GridView -Title "Choice (Active instance: '$ActiveInstance')" -OutputMode Single
 
     if ($Choice.Function -ne 'Exit') {
         $FunctionName = $Choice.Function
