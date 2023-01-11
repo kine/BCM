@@ -10,17 +10,6 @@ function RegisterFunction
     Write-Host "Registering function $Function with name $Name"
     Set-Variable -Name MenuItems -Value ($MenuItems + @{Function=$Function;Name=$Name}) -scope Global
 }
-function SelectInstance
-{
-    $Instances = Get-NavServerInstance
-    $Instance = $Instances | Out-GridView -Title "Select instance" -OutputMode Single
-    return $Instance.ServerInstance
-}
-
-function SetInstance
-{
-    Set-Variable -Name ActiveInstance -Value (SelectInstance) -Scope Global
-}
 
 Set-Variable -Name MenuItems -Value @() -Scope Global
 
@@ -32,7 +21,6 @@ Import-Module (Get-ChildItem -Path 'C:\Program Files\Microsoft Dynamics 365 Busi
 Set-Variable -Name ActiveInstance -Value '' -Scope Global
 $Choice = ''
 
-RegisterFunction -Function 'SetInstance' -Name 'Select Instance'
 RegisterFunction -Function 'Exit' -Name 'Exit'
 
 do {
