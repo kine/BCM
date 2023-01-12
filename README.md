@@ -24,4 +24,5 @@ Copy the script(s) and run "start-bcm.ps1".
 
 ## Example Screenshot
 
-![image](https://user-images.githubusercontent.com/110221/211776751-1ebe3500-9a63-470e-8e55-eb24047ee962.png)
+![image](https://user-images.githubusercontent.com/110221/212021788-e1159463-88be-4bfa-a68a-366e4c1604df.png)
+
