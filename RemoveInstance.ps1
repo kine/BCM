@@ -1,6 +1,10 @@
-function RemoveInstance
+function RemoveInstace
 {
-    $Instance = GetActiveInstance -LoadModules
+    if (-not $ActiveInstance) {
+        $Instance = (SelectInstance).ServerInstance
+    } else {
+        $Instance = $ActiveInstance
+    }
 
     if ($Instance) {
         Add-Type -AssemblyName PresentationFramework
@@ -8,7 +12,6 @@ function RemoveInstance
         if ($continue -eq 'Yes') {
             Write-Host "Removing $Instance"
             Remove-NAVServerInstance -ServerInstance $Instance -Force
-            Read-Host "Press enter to continue"
         }
     }
 }

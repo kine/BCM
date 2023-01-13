@@ -1,15 +1,12 @@
 function StopInstances
 {
-    if (-not $ActiveInstance) {
-        $Instances = SelectInstance -Multiple $true
-    } else {
-        $Instances = $ActiveInstance
-    }
+    $Instance = GetActiveInstance -LoadModules
 
     if ($Instances) {
         foreach($Instance in $instances){
             Write-Host "Stop $Instance"
-            Restart-NAVServerInstance -ServerInstance $Instance -Force
+            Stop-NAVServerInstance -ServerInstance $Instance -Force
+            Read-Host "Press enter to continue"
         }
     }
 }

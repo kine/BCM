@@ -11,15 +11,10 @@ function SetNewConfigValue
 
 function Config
 {
-    if (-not $ActiveInstance) {
-        $Instance = SelectInstance
-    } else {
-        $Instance = $ActiveInstance
-    }
-
+    $Instance = GetActiveInstance -LoadModules
     do {
-
-        $Config = Get-NAVServerConfiguration -ServerInstance $Instance 
+        Write-Host "Reading Configuration for $Instance" -ForegroundColor Green
+        $Config = Get-NAVServerConfiguration -ServerInstance $Instance
 
         $ConfigHash = @{}
 

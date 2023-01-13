@@ -62,6 +62,7 @@ Executing:
         $InstanceParams.Remove('DatabaseCredentials')
     } 
     New-NAVServerInstance -Force @InstanceParams
+    Read-Host "Press enter to continue"
 
 }
 
