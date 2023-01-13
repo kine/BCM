@@ -1,21 +1,22 @@
 function CreateInstance
 {
-  $InstanceParams = 
-    @{'ServerInstance'='<InstanceName>';
-    'ManagementServicesPort'='7045';
-    'ClientServicesPort'='7046';
-    'SOAPServicesPort'='7047';
-    'ODataServicesPort'='7048';
-    'DeveloperServicesPort'='7049';
-    'DatabaseServer'='<ServerName>';
-    'DatabaseInstance'='';
-    'DatabaseName'='<DatabaseName>';
-    'DatabaseCredentials'='';
-    'ClientServicesCredentialType'='Windows';
-    'ServicesCertificateThumbprint'='';
-    'ServiceAccount'='NetworkService';
-    'ServiceAccountCredential'=''}
-    
+    $Version = GetVersion
+    $InstanceParams = 
+        @{'ServerInstance'='<InstanceName>';
+        'ManagementServicesPort'='7045';
+        'ClientServicesPort'='7046';
+        'SOAPServicesPort'='7047';
+        'ODataServicesPort'='7048';
+        'DeveloperServicesPort'='7049';
+        'DatabaseServer'='<ServerName>';
+        'DatabaseInstance'='';
+        'DatabaseName'='<DatabaseName>';
+        'DatabaseCredentials'='';
+        'ClientServicesCredentialType'='Windows';
+        'ServicesCertificateThumbprint'='';
+        'ServiceAccount'='NetworkService';
+        'ServiceAccountCredential'=''}
+        
 
     do {
         $Choice = $InstanceParams | Out-GridView -Title "Select parameter (cancel for continue)" -OutputMode Single
@@ -61,6 +62,8 @@ Executing:
     if ($InstanceParams.DatabaseCredentials -eq '') {
         $InstanceParams.Remove('DatabaseCredentials')
     } 
+    LoadModules -Version $Version
+    Write-Host "Creating instance" -ForegroundColor Green
     New-NAVServerInstance -Force @InstanceParams
     Read-Host "Press enter to continue"
 
