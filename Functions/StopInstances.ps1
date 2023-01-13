@@ -1,11 +1,20 @@
 function StopInstances
 {
-    $Instance = GetActiveInstance -LoadModules
+    $Instances = SelectInstance -Multiple $True
 
     if ($Instances) {
-        foreach($Instance in $instances){
-            Write-Host "Stop $Instance"
-            Stop-NAVServerInstance -ServerInstance $Instance -Force
+        try {
+            foreach($Instance in $instances){
+                $Modules = GetModules -Version $Instance.Version
+                $Script= {
+                    param ($Modules,$Instance)
+                    Import-Module $Modules -Scope Local
+                    Write-Host "Stopping $Instance"
+                    Stop-NAVServerInstance -ServerInstance $Instance -Force
+                }
+                Invoke-Command -ComputerName . -ScriptBlock $Script -ArgumentList $Modules,$Instance.ServerInstance
+            }
+        } finally {
             Read-Host "Press enter to continue"
         }
     }

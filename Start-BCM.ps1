@@ -88,12 +88,12 @@ function GetModules
     )
     $Modules = @()
     $Path = 'C:\Program Files\Microsoft Dynamics 365 Business Central'
-    Write-Host "Looking into $Path for $Version"
+    Write-Verbose "Looking into $Path for $Version"
     $Files = (Get-ChildItem -Path $Path -Include 'Microsoft.Dynamics.Nav.Management.dll' -Recurse | Where-Object {$_.VersionInfo.ProductVersion -like "$Version*"} | Sort-Object -Property LastWriteTime | Select-Object -Last 1)
-    Write-Host "Found $Files"
+    Write-Verbose "Found $Files"
     $Modules += $Files
     $Files = (Get-ChildItem -Path $Path -Include 'Microsoft.Dynamics.Nav.Apps.Management.dll' -Recurse | Where-Object {$_.VersionInfo.ProductVersion -like "$Version*"} | Sort-Object -Property LastWriteTime | Select-Object -Last 1)
-    Write-Host "Found $Files"
+    Write-Verbose "Found $Files"
     $Modules += $Files
     Return $Modules
 }
@@ -102,8 +102,10 @@ function LoadModules
     param(
         $Version=''
     )
+    $ModulesFiles = GetModules -Version $Version
     Write-Host "Loading modules for version $Version" -ForegroundColor Green
-    $Modules = GetModules -Version $Version
+    Write-Host "$ModulesFiles" -ForegroundColor Green
+    $Modules = $ModulesFiles
     Import-Module $Modules
 }
 
