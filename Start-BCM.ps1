@@ -34,6 +34,9 @@ Name of the function which will be called when menu item is selected (no paramet
 .PARAMETER Name
 Description to show in the menu
 
+.PARAMETER NewShell
+If set to $true, function will be called in new shell
+
 .EXAMPLE
 RegisterFunction -Function 'Exit' -Name 'Exit'
 
