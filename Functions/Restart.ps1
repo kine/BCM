@@ -1,15 +1,24 @@
 function Restart
 {
-    $Instance = GetActiveInstance -LoadModules
+    $Instances = SelectInstance -Multiple $True
 
-    if ($Instance) {
+    if ($Instances) {
         try {
-            Write-Host "Restarting $Instance"
-            Restart-NAVServerInstance -ServerInstance $Instance -Force
+            foreach($Instance in $instances){
+                $Modules = GetModules -Version $Instance.Version
+                $Script= {
+                    param ($Modules,$Instance)
+                    Import-Module $Modules -Scope Local
+                    Write-Host "Starting $Instance" -ForegroundColor Green
+                    Start-NAVServerInstance -ServerInstance $Instance -Force
+                }
+                Invoke-Command -ComputerName . -ScriptBlock $Script -ArgumentList $Modules,$Instance.ServerInstance
+            }
         } finally {
             Read-Host "Press enter to continue"
         }
     }
+
 }
 
 RegisterFunction -Function 'Restart' -Name 'Restart Instance'
