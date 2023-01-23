@@ -10,7 +10,11 @@ function UnpublishApps {
                 $AppsToUnpublish = $Apps | Out-GridView -Title "Select Apps to Unpublish" -OutputMode Multiple
                 foreach($App in $AppsToUnpublish){
                     Write-Host "Unpublishing $($App.Name) version $($App.Version)" -ForegroundColor Green
-                    $App | Unpublish-NAVApp -ServerInstance $Instance -Tenant $Tenant.Id -Force
+                    If ($App.Scope -eq 'Tenant') {
+                        $App | Unpublish-NAVApp -ServerInstance $Instance -Tenant $Tenant.Id
+                    } else {
+                        $App | Unpublish-NAVApp -ServerInstance $Instance
+                    }
                 }
             }
         } finally {
