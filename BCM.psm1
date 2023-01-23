@@ -1,0 +1,1 @@
+. (Join-Path $PSScriptRoot "Start-BCM.ps1")
