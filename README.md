@@ -30,5 +30,4 @@ Start-BCM
 
 ## Example Screenshot
 
-![image](https://user-images.githubusercontent.com/110221/212021788-e1159463-88be-4bfa-a68a-366e4c1604df.png)
-
+![image](https://user-images.githubusercontent.com/110221/213993599-58c00ff5-3bc5-455d-aa5b-b2b6dc962970.png)
