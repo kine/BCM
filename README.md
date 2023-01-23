@@ -17,7 +17,7 @@ Copy the script(s) and run "start-bcm.ps1".
 - Call this function inside the script:
 
   ```Powershell
-  RegisterFunction -Function 'Config' -Name 'Instance Configuration'
+  RegisterFunction -Function 'Config' -Name 'Instance Configuration' -
   ```
 
   Where Function is name of the function which should be called when the menu item is selected, and Name is display name for the menu.
