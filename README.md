@@ -8,19 +8,25 @@ Because Admin GUI was removed from BCv21, this is "replacement" for everyone, wh
 
 ### Run the tool
 
-Copy the script(s) and run "start-bcm.ps1".
+Call this in powershell:
+
+```powershell
+Install-module BCM -Force
+Start-BCM
+```
 
 ### Extend the tool
 
-- Add new .ps1 file into the folder
+- Add new .ps1 file into the Functions folder
 - Define your functions inside it
 - Call this function inside the script:
 
   ```Powershell
-  RegisterFunction -Function 'Config' -Name 'Instance Configuration' -
+  RegisterFunction -Function 'Config' -Name 'Instance Configuration' -NewShell $True
   ```
 
-  Where Function is name of the function which should be called when the menu item is selected, and Name is display name for the menu.
+  Where Function is name of the function which should be called when the menu item is selected, and Name is display name for the menu. NewShell means that the function will be started in separate powershell
+  window to keep it multi-version safe. Set $False if you want to run the function in the main console.
 
 ## Example Screenshot
 
