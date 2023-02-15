@@ -15,11 +15,11 @@ Set which version of Management libraries to load. If empty, Latest is used. Exa
 function Start-BCM {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [String]$Version = '',
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [String]$Function = '',
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [String]$Instance = ''
     )
 
@@ -43,85 +43,84 @@ function Start-BCM {
     RegisterFunction -Function 'Exit' -Name 'Exit'
 
     #>
-    function RegisterFunction
-    {
-        param($Function,$Name,[bool]$NewShell=$true)
+    function RegisterFunction {
+        param($Function, $Name, [bool]$NewShell = $true)
         Write-Host "Registering function $Function with name $Name" -ForegroundColor Green
-        Set-Variable -Name MenuItems -Value ($MenuItems + @{Function=$Function;Name=$Name;NewShell=$NewShell}) -scope Global
+        Set-Variable -Name MenuItems -Value ($MenuItems + @{Function = $Function; Name = $Name; NewShell = $NewShell }) -scope Global
     }
 
-    function RunFunction
-    {
+    function RunFunction {
         param(
             $Function,
             [Switch]$NewWindow
-            )
-            Write-Host "Running function $Function" -ForegroundColor Green
-            if ($NewWindow) {
-                if (-not $ActiveVersion) {
-                    $Version = "''"
-                } else {
-                    $Version = $ActiveVersion
-                }
-                $Script = 'Start-BCM'
-                if ($ActiveInstance) {
-                    $PSParams = @{
-                        FilePath     = "PowerShell.exe"
-                        ArgumentList = @(
-                            "-File $Script -Version $Version -Instance $ActiveInstance -Function $Function"
-                            )
-                        }
-                    } else {
-                        $PSParams = @{
+        )
+        Write-Host "Running function $Function" -ForegroundColor Green
+        if ($NewWindow) {
+            if (-not $ActiveVersion) {
+                $Version = "''"
+            }
+            else {
+                $Version = $ActiveVersion
+            }
+            $Script = 'Start-BCM'
+            if ($ActiveInstance) {
+                $PSParams = @{
                     FilePath     = "PowerShell.exe"
                     ArgumentList = @(
-                        "-File $Script -Version $Version -Function $Function"
-                        )
+                        "-Command $Script -Version $Version -Instance $ActiveInstance -Function $Function"
+                    )
+                }
+            }
+            else {
+                $PSParams = @{
+                    FilePath     = "PowerShell.exe"
+                    ArgumentList = @(
+                        "-Command $Script -Version $Version -Function $Function"
+                    )
                 }
             }
             Write-Host "Executing Start-Process with $($PSParams.ArgumentList)"
             Start-Process @PSParams -Wait
-        } else {
+        }
+        else {
             &$Function
         }
     }
 
-    function GetModules
-    {
+    function GetModules {
         param(
-            $Version=''
-            )
-            $Modules = @()
-            $Path = 'C:\Program Files\Microsoft Dynamics 365 Business Central'
+            $Version = ''
+        )
+        $Modules = @()
+        $Path = 'C:\Program Files\Microsoft Dynamics 365 Business Central'
         Write-Verbose "Looking into $Path for $Version"
-        $Files = (Get-ChildItem -Path $Path -Include 'Microsoft.Dynamics.Nav.Management.dll' -Recurse | Where-Object {$_.VersionInfo.ProductVersion -like "$Version*"} | Sort-Object -Property LastWriteTime | Select-Object -Last 1)
+        $Files = (Get-ChildItem -Path $Path -Include 'Microsoft.Dynamics.Nav.Management.dll' -Recurse | Where-Object { $_.VersionInfo.ProductVersion -like "$Version*" } | Sort-Object -Property LastWriteTime | Select-Object -Last 1)
         Write-Verbose "Found $Files"
         $Modules += $Files
-        $Files = (Get-ChildItem -Path $Path -Include 'Microsoft.Dynamics.Nav.Apps.Management.dll' -Recurse | Where-Object {$_.VersionInfo.ProductVersion -like "$Version*"} | Sort-Object -Property LastWriteTime | Select-Object -Last 1)
+        $Files = (Get-ChildItem -Path $Path -Include 'Microsoft.Dynamics.Nav.Apps.Management.dll' -Recurse | Where-Object { $_.VersionInfo.ProductVersion -like "$Version*" } | Sort-Object -Property LastWriteTime | Select-Object -Last 1)
         Write-Verbose "Found $Files"
         $Modules += $Files
         Return $Modules
     }
-    function LoadModules
-    {
+    function LoadModules {
         param(
-            $Version=''
-            )
-            $ModulesFiles = GetModules -Version $Version
-            Write-Host "Loading modules for version $Version" -ForegroundColor Green
-            Write-Host "$ModulesFiles" -ForegroundColor Green
-            $Modules = $ModulesFiles
-            Import-Module $Modules
-        }
+            $Version = ''
+        )
+        $ModulesFiles = GetModules -Version $Version
+        Write-Host "Loading modules for version $Version" -ForegroundColor Green
+        Write-Host "$ModulesFiles" -ForegroundColor Green
+        $Modules = $ModulesFiles
+        Import-Module $Modules
+    }
         
-        Set-Variable -Name MenuItems -Value @() -Scope Global
+    Set-Variable -Name MenuItems -Value @() -Scope Global
         
-        Get-ChildItem -Path $PSScriptRoot -Filter *.ps1 -Exclude Start-BCM.ps1 -Recurse | ForEach-Object {Write-Host "Executing $($_.Name)";. "$($_.FullName)"}
+    Get-ChildItem -Path $PSScriptRoot -Filter *.ps1 -Exclude Start-BCM.ps1 -Recurse | ForEach-Object { Write-Host "Executing $($_.Name)"; . "$($_.FullName)" }
         
-        Set-Variable -Name ActiveInstance -Value '' -Scope Global
-        Set-Variable -Name ActiveVersion -Value '' -Scope Global
+    Set-Variable -Name ActiveInstance -Value '' -Scope Global
+    Set-Variable -Name ActiveVersion -Value '' -Scope Global
         
-        Write-Host "Version: $Version" -ForegroundColor Green
+    Write-Host "Version: $Version" -ForegroundColor Green
     Write-Host "Instance: $Instance" -ForegroundColor Green
     if ($Instance) {
         Write-Host "Setting ActiveInstance to $Instance"
@@ -147,13 +146,15 @@ function Start-BCM {
     if ($Function) {
         try {
             RunFunction -Function $Function
-        } catch {
+        }
+        catch {
             Read-Host "$_"
         }
-    } else {
+    }
+    else {
         do {
             Write-Host "Displaying menu"
-            $Choice = $MenuItems | Select-Object -property @{Label="Function";Expression={($_.Function)}},@{Label="Description";Expression={($_.Name)}},@{Label="InNewShell";Expression={($_.NewShell)}} | Out-GridView -Title "Choice (Active instance: '$ActiveInstance')" -OutputMode Single
+            $Choice = $MenuItems | Select-Object -property @{Label = "Function"; Expression = { ($_.Function) } }, @{Label = "Description"; Expression = { ($_.Name) } }, @{Label = "InNewShell"; Expression = { ($_.NewShell) } } | Out-GridView -Title "Choice (Active instance: '$ActiveInstance')" -OutputMode Single
             
             if ($Choice -and ($Choice.Function -ne 'Exit')) {
                 $FunctionName = $Choice.Function
