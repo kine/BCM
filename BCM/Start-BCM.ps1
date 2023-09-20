@@ -20,7 +20,8 @@ function Start-BCM {
         [Parameter(Mandatory = $false)]
         [String]$Function = '',
         [Parameter(Mandatory = $false)]
-        [String]$Instance = ''
+        [String]$Instance = '',
+        [Switch]$Docker
     )
 
     <#
@@ -44,9 +45,9 @@ function Start-BCM {
 
     #>
     function RegisterFunction {
-        param($Function, $Name, [bool]$NewShell = $true)
+        param($Function, $Name, [bool]$NewShell = $true, [bool]$Docker = $false)
         Write-Host "Registering function $Function with name $Name" -ForegroundColor Green
-        Set-Variable -Name MenuItems -Value ($MenuItems + @{Function = $Function; Name = $Name; NewShell = $NewShell }) -scope Global
+        Set-Variable -Name MenuItems -Value ($MenuItems + @{Function = $Function; Name = $Name; NewShell = $NewShell; Docker = $Docker }) -scope Global
     }
 
     function RunFunction {
@@ -56,30 +57,32 @@ function Start-BCM {
         )
         Write-Host "Running function $Function" -ForegroundColor Green
         if ($NewWindow) {
+            $ModulePath = (get-module BCM).Path
             if (-not $ActiveVersion) {
                 $Version = "''"
             }
             else {
                 $Version = $ActiveVersion
             }
-            $Script = 'Start-BCM'
             if ($ActiveInstance) {
+                $Script = "'import-module '$ModulePath';Start-BCM -Version '$Version' -Instance '$ActiveInstance' -Function '$Function' -Docker:$$Docker'"
                 $PSParams = @{
                     FilePath     = "PowerShell.exe"
                     ArgumentList = @(
-                        "-Command $Script -Version $Version -Instance $ActiveInstance -Function $Function"
+                        "$Script"
                     )
                 }
             }
             else {
+                $Script = "'import-module '$ModulePath';Start-BCM -Version '$Version' -Function '$Function' -Docker:$$Docker'"
                 $PSParams = @{
                     FilePath     = "PowerShell.exe"
                     ArgumentList = @(
-                        "-Command $Script -Version $Version -Function $Function"
+                        "$Script"
                     )
                 }
             }
-            Write-Host "Executing Start-Process with $($PSParams.ArgumentList)"
+            Write-Host "Executing Start-Process $($PSParams.FilePath) -ArgumentList $($PSParams.ArgumentList)"
             Start-Process @PSParams -Wait
         }
         else {
@@ -117,15 +120,23 @@ function Start-BCM {
         
     Get-ChildItem -Path $PSScriptRoot -Filter *.ps1 -Exclude Start-BCM.ps1 -Recurse | ForEach-Object { Write-Host "Executing $($_.Name)"; . "$($_.FullName)" }
         
+    Set-Variable -Name ActiveContainer -Value '' -Scope Global
     Set-Variable -Name ActiveInstance -Value '' -Scope Global
     Set-Variable -Name ActiveVersion -Value '' -Scope Global
         
     Write-Host "Version: $Version" -ForegroundColor Green
     Write-Host "Instance: $Instance" -ForegroundColor Green
-    if ($Instance) {
-        Write-Host "Setting ActiveInstance to $Instance"
-        $ActiveInstance = $Instance
-        Set-Variable -Name ActiveInstance -Value $Instance -Scope Global
+    if ($Docker -and $Instance) {
+        Write-Host "Setting ActiveContainer to $Instance"
+        $ActiveContainer = $Instance
+        Set-Variable -Name ActiveContainer -Value $Instance -Scope Global
+    }
+    else {
+        if ($Instance) {
+            Write-Host "Setting ActiveInstance to $Instance"
+            $ActiveInstance = $Instance
+            Set-Variable -Name ActiveInstance -Value $Instance -Scope Global
+        }
     }
     if ($Version -eq "''") {
         $Version = ''
@@ -140,7 +151,7 @@ function Start-BCM {
 
     #Load modules for latest version to be able to e.g. list instances
 
-    RegisterFunction -Function 'Exit' -Name 'Exit'
+    RegisterFunction -Function 'Exit' -Name 'Exit' -Docker $Docker
 
     Write-Host "Function: $Function" -ForegroundColor Green
     if ($Function) {
@@ -154,7 +165,7 @@ function Start-BCM {
     else {
         do {
             Write-Host "Displaying menu"
-            $Choice = $MenuItems | Select-Object -property @{Label = "Function"; Expression = { ($_.Function) } }, @{Label = "Description"; Expression = { ($_.Name) } }, @{Label = "InNewShell"; Expression = { ($_.NewShell) } } | Out-GridView -Title "Choice (Active instance: '$ActiveInstance')" -OutputMode Single
+            $Choice = $MenuItems | where-object { $_.Docker -eq $Docker } | Select-Object -property @{Label = "Function"; Expression = { ($_.Function) } }, @{Label = "Description"; Expression = { ($_.Name) } }, @{Label = "InNewShell"; Expression = { ($_.NewShell) } } | Out-GridView -Title "Choice (Active instance: '$ActiveInstance$ActiveContainer')" -OutputMode Single
             
             if ($Choice -and ($Choice.Function -ne 'Exit')) {
                 $FunctionName = $Choice.Function
